@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
-    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:5175"]
 
     UPLOAD_DIR: str = "/app/storage/docker-images"
     REPORTS_DIR: str = "/app/storage/reports"

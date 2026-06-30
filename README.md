@@ -26,7 +26,9 @@ docker compose -f docker/docker-compose.yml up --build
 ```
 
 - Backend: http://localhost:8000/docs
-- Frontend: http://localhost:5173
+- Frontend: http://localhost:5175 (host port 5175 -> container's Vite dev server on 5173; change
+  the `frontend` port mapping in `docker/docker-compose.yml` if you'd rather use a different host
+  port, and keep `CORS_ORIGINS` in `backend/.env` in sync if you do)
 - `POST /api/v1/auth/register` then `/auth/login` to get a JWT, `/auth/me` to verify RBAC role claim.
 
 ## Batch 2 notes
