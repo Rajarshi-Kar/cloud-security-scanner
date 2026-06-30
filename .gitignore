@@ -1,0 +1,33 @@
+# Internal planning docs (not part of the shipped project)
+claude.md
+design.md
+tech_stack.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Env / secrets
+.env
+*.env.local
+
+# Storage (uploaded images, generated reports)
+backend/storage/
+
+# Docker
+docker-compose.override.yml
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
