@@ -4,29 +4,44 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 
-export default function LoginPage() {
-  const { login } = useAuth();
+export default function RegisterPage() {
+  const { register } = useAuth();
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
-      await login(email, password);
+      await register(email, password, fullName);
       navigate("/dashboard");
-    } catch {
-      setError("Invalid email or password");
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setError(detail ?? "Could not create account");
+    } finally {
+      setSubmitting(false);
     }
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-8 shadow">
-        <h1 className="text-xl font-semibold text-slate-800">Cloud Security Scanner</h1>
+        <h1 className="text-xl font-semibold text-slate-800">Create an account</h1>
         {error && <p className="text-sm text-red-600">{error}</p>}
+        <input
+          type="text"
+          placeholder="Full name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          className="w-full rounded border px-3 py-2"
+          required
+        />
         <input
           type="email"
           placeholder="Email"
@@ -41,15 +56,20 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full rounded border px-3 py-2"
+          minLength={8}
           required
         />
-        <button type="submit" className="w-full rounded bg-slate-800 py-2 text-white hover:bg-slate-700">
-          Sign in
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full rounded bg-slate-800 py-2 text-white hover:bg-slate-700 disabled:opacity-50"
+        >
+          {submitting ? "Creating account..." : "Sign up"}
         </button>
         <p className="text-center text-sm text-slate-500">
-          Don&apos;t have an account?{" "}
-          <Link to="/register" className="text-slate-800 underline">
-            Sign up
+          Already have an account?{" "}
+          <Link to="/login" className="text-slate-800 underline">
+            Sign in
           </Link>
         </p>
       </form>
