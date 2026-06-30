@@ -2,6 +2,7 @@ import glob
 import json
 import os
 import subprocess
+import tempfile
 
 from app.core.logging import get_logger
 from app.models.vulnerability import Severity, VulnerabilitySource
@@ -53,12 +54,17 @@ def run_pip_audit(repo_path: str) -> list[Finding]:
 
 
 def run_safety(repo_path: str) -> list[Finding]:
-    """Runs safety against each requirements*.txt found in the repo."""
+    """Runs safety against each requirements*.txt found in the repo.
+
+    `safety check`'s --json mode still prints a deprecation banner to stdout ahead of the JSON
+    payload, so output is written to a file instead of being parsed from stdout.
+    """
     findings: list[Finding] = []
     for req_file in _find_requirements_files(repo_path):
+        report_path = os.path.join(tempfile.mkdtemp(prefix="safety-"), "report.json")
         try:
-            proc = subprocess.run(
-                ["safety", "check", "-r", req_file, "--json"],
+            subprocess.run(
+                ["safety", "check", "-r", req_file, "--save-json", report_path],
                 capture_output=True,
                 timeout=300,
                 text=True,
@@ -67,12 +73,13 @@ def run_safety(repo_path: str) -> list[Finding]:
             logger.warning("safety run failed: %s", exc)
             return findings
 
-        if not proc.stdout:
+        if not os.path.exists(report_path) or os.path.getsize(report_path) == 0:
             continue
-        try:
-            payload = json.loads(proc.stdout)
-        except json.JSONDecodeError:
-            continue
+        with open(report_path, encoding="utf-8") as f:
+            try:
+                payload = json.load(f)
+            except json.JSONDecodeError:
+                continue
 
         for vuln in payload.get("vulnerabilities", []):
             findings.append(
