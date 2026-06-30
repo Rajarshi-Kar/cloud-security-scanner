@@ -11,10 +11,12 @@ RUN curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAK
     && tar -xzf /tmp/gitleaks.tar.gz -C /usr/local/bin gitleaks \
     && rm /tmp/gitleaks.tar.gz
 
-# trivy install script pulls the right release binary for the detected arch.
-ARG TRIVY_VERSION=0.52.2
-RUN curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-    | sh -s -- -b /usr/local/bin "v${TRIVY_VERSION}"
+# trivy has no pip package; install the release binary directly (same approach as gitleaks above).
+ARG TRIVY_VERSION=0.71.2
+RUN curl -sSL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
+    -o /tmp/trivy.tar.gz \
+    && tar -xzf /tmp/trivy.tar.gz -C /usr/local/bin trivy \
+    && rm /tmp/trivy.tar.gz
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
